@@ -15,4 +15,3 @@ for i, emb in enumerate(embeddings):
     print(f"Sentence: {sentences[i]}")
     print(f"Vector (first 5 values): {emb[:2]}")
     print()
-print(embeddings)
