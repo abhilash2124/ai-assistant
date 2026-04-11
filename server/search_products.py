@@ -1,7 +1,13 @@
 from qdrant_client import QdrantClient
 from sentence_transformers import SentenceTransformer
 from qdrant_client.models import Filter, FieldCondition, MatchValue
+from groq import Groq
+from dotenv import load_dotenv
+import os
 
+load_dotenv()
+
+client_groq = Groq(api_key=os.getenv("GROQ_API_KEY"))
 # Load model
 model = SentenceTransformer("all-MiniLM-L6-v2")
 
@@ -60,3 +66,37 @@ for res in results.points:
     print(f"   ⭐ Score: {res.score}\n")
 
 client.close()
+
+
+# Create context from top results
+# context = "\n".join([
+#     f"{res.payload['name']}: {res.payload['description']}"
+#     for res in results.points
+# ])
+context = "\n".join([res.payload["name"] for res in results.points])
+
+# Create prompt
+prompt = f"""
+You are an AI product recommendation assistant.
+
+Based on the context below, suggest the best product and explain why.
+
+Context:
+{context}
+
+User Query:
+{query}
+
+Answer:
+"""
+
+# Call LLM
+response = client_groq.chat.completions.create(
+    model="llama-3.3-70b-versatile",
+    messages=[
+        {"role": "user", "content": prompt}
+    ]
+)
+
+print("\n🤖 AI Recommendation:\n")
+print(response.choices[0].message.content)
