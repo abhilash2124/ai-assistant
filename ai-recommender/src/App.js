@@ -1,49 +1,3 @@
-// import { useState } from "react";
-
-// function App() {
-//   const [query, setQuery] = useState("");
-//   const [products, setProducts] = useState([]);
-//   const [answer, setAnswer] = useState("");
-
-//   const handleSearch = async () => {
-//     const res = await fetch(`http://127.0.0.1:8000/recommend?query=${query}`);
-//     const data = await res.json();
-
-//     setProducts(data.products);
-//     setAnswer(data.answer);
-//   };
-
-//   return (
-//     <div style={{ padding: "20px" }}>
-//       <h1>AI Product Recommender 🤖</h1>
-
-//       <input
-//         type="text"
-//         placeholder="Enter your need..."
-//         value={query}
-//         onChange={(e) => setQuery(e.target.value)}
-//         style={{ width: "300px", padding: "10px" }}
-//       />
-
-//       <button onClick={handleSearch} style={{ marginLeft: "10px" }}>
-//         Search
-//       </button>
-
-//       <h2>Recommendations:</h2>
-//       {products.map((p) => (
-//         <div key={p.id}>
-//           <h3>{p.name}</h3>
-//           <p>{p.description}</p>
-//           <p>₹{p.price}</p>
-//         </div>
-//       ))}
-
-//       <h2>AI Explanation:</h2>
-//       <p>{answer}</p>
-//     </div>
-//   );
-// }
-
 // export default App;
 import { useState } from "react";
 import "./App.css";
@@ -79,9 +33,10 @@ function App() {
         <button onClick={handleSearch}>Search</button>
       </div>
 
-      {loading && <p>⏳ Loading...</p>}
+      {/* {loading && <p>⏳ Loading...</p>} */}
+      {loading && <div className="loader"></div>}
 
-      <div className="grid">
+      {/* <div className="grid">
         {products.map((p) => (
           <div className="card" key={p.id}>
             <h3>{p.name}</h3>
@@ -89,12 +44,42 @@ function App() {
             <h4>₹{p.price}</h4>
           </div>
         ))}
+      </div> */}
+      <div className="grid">
+        {products.map((p, index) => (
+          <div className="card" key={p.id}>
+
+            {index === 0 && <span className="badge">🏆 Best Match</span>}
+
+            <h3 className="title">{p.name}</h3>
+
+            <p className="desc">{p.description}</p>
+
+            <div className="price-row">
+              <span className="price">₹{p.price}</span>
+              <span className="category">{p.category}</span>
+            </div>
+
+          </div>
+        ))}
       </div>
 
+
       {answer && (
-        <div className="answer-box">
-          <h2>🤖 AI Recommendation</h2>
-          <p>{answer}</p>
+        <div className="ai-box">
+          <div className="ai-header">
+            <span>🤖</span>
+            <h2>AI Recommendation</h2>
+          </div>
+
+          <div className="ai-content">
+            {/* <p>{answer}</p> */}
+            <ul>
+              {answer.split(". ").map((line, index) => (
+                <li key={index}>{line}</li>
+              ))}
+            </ul>
+          </div>
         </div>
       )}
     </div>

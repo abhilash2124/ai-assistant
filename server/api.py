@@ -51,13 +51,13 @@ def home():
 def recommend(query: str):
     
     products = list(collection.find({}, {"_id": 0}))
-    
+
     if not query or query.strip() == "":
         return {
             "products": [],
             "answer": "Please enter a search query."
         }
-    
+
     query_vector = model.encode(query).tolist()
     price_limit = extract_price(query)
     # Detect category
@@ -85,7 +85,7 @@ def recommend(query: str):
     #         query=query_vector,
     #         limit=3
     #     )
-    
+
     # Build filter conditions
     conditions = []
 
@@ -119,7 +119,7 @@ def recommend(query: str):
             query=query_vector,
             limit=3
         )
-        
+
     #  Smart fallback
     if len(results.points) == 0:
     # Retry without price filter
@@ -139,12 +139,12 @@ def recommend(query: str):
                 limit=3
             )
 
-        # Still no results → return message
-        if len(results.points) == 0:
-            return {
-                "products": [],
-                "answer": "No matching products found. Try changing your query."
-            }
+    # Still no results → return message
+    if len(results.points) == 0:
+        return {
+            "products": [],
+            "answer": "No matching products found. Try changing your query."
+        }
     # Build context
     context = "\n".join([
         f"{res.payload['name']}: {res.payload['description']}"
@@ -164,7 +164,6 @@ def recommend(query: str):
     {query}
 
     Answer:
-    include any other best options also best on user query at that price point if possible.
     """
 
     response = groq_client.chat.completions.create(

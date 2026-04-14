@@ -39,4 +39,10 @@ secrets.json
 Thumbs.db
 .vscode/
 .idea/
-*.swp
+*.
+
+# MongoDB dumps
+dump/
+
+# Logs
+*.log
