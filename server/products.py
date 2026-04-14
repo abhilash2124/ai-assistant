@@ -40,5 +40,19 @@ products = [
         "description": "Gaming laptop, high performance, good graphics",
         "category": "laptop",
         "price": 70000
+    },
+    {
+    "id": 7,
+    "name": "Redmi Note 12",
+    "description": "Budget phone, good battery, decent performance",
+    "category": "phone",
+    "price": 15000
+    },
+    {
+        "id": 8,
+        "name": "Realme Narzo 60",
+        "description": "Affordable gaming, good performance, long battery",
+        "category": "phone",
+        "price": 18000
     }
 ]

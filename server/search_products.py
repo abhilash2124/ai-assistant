@@ -5,9 +5,21 @@ from groq import Groq
 from dotenv import load_dotenv
 import os
 
-load_dotenv()
+import re
+from qdrant_client.models import Filter, FieldCondition, MatchValue, Range
+
+# load_dotenv()
+load_dotenv("server/.env")
+
+def extract_price(query):
+    match = re.search(r'under (\d+)', query.lower())
+    if match:
+        return int(match.group(1))
+    return None
+
 
 client_groq = Groq(api_key=os.getenv("GROQ_API_KEY"))
+
 # Load model
 model = SentenceTransformer("all-MiniLM-L6-v2")
 
