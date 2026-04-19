@@ -152,18 +152,20 @@ def recommend(query: str):
     ])
 
     prompt = f"""
-    You are an AI product recommendation assistant.
+    You are an expert product recommendation assistant.
 
-    Use ONLY the context below to recommend the best product.
-    Explain clearly why it is suitable.
+    Give a clear, short recommendation.
+
+    Format:
+    - Best product names
+    - 2-3 bullet reasons
+    - Keep it concise
 
     Context:
-    {context}
+    {context} 
 
-    User Query:
-    {query}
-
-    Answer:
+    Query:
+    {query} and  also include any better recommendations based on the query, even if they are not in the context.
     """
 
     response = groq_client.chat.completions.create(

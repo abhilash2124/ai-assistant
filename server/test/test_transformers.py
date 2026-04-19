@@ -15,7 +15,7 @@
 #     print(f"Sentence: {sentences[i]}")
 #     print(f"Vector (first 5 values): {emb[:2]}")
 #     print()
-from products import products
+from server.test.products import products
 
 for product in products:
     print(product["name"], "-", product["category"])

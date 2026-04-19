@@ -1,7 +1,7 @@
 from qdrant_client import QdrantClient
 from sentence_transformers import SentenceTransformer
 from qdrant_client.models import PointStruct, VectorParams, Distance
-from products import products
+from server.test.products import products
 
 model = SentenceTransformer("all-MiniLM-L6-v2")
 

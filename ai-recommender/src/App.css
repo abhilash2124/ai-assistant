@@ -148,7 +148,7 @@ h1 {
 }
 
 .ai-content ul li::before {
-  content: "👨‍💻";
+  content: "✨";
   position: absolute;
   left: 0;
   top: 0;
