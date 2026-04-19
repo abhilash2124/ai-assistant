@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 import os
 from fastapi.middleware.cors import CORSMiddleware
 import re
+from server.agent import agent
 
 # from qdrant_client.models import Range
 from pymongo import MongoClient
@@ -42,6 +43,22 @@ def extract_price(query):
     if match:
         return int(match.group(1)) * 1000
     return None
+
+# @app.get("/agent")
+# def agent_api(query: str):
+#     result = agent(query)
+#     return {"answer": result}
+@app.get("/agent")
+def agent_api(query: str):
+    result = agent(query)
+
+    # ALSO call recommend to get products
+    rec = recommend(query)
+
+    return {
+        "products": rec["products"], 
+        "answer": result
+    }
 
 @app.get("/")
 def home():
@@ -152,21 +169,23 @@ def recommend(query: str):
     ])
 
     prompt = f"""
-    You are an expert product recommendation assistant.
+You are an expert product recommendation assistant.
 
-    Give a clear, short recommendation.
+Use ONLY the given context.
 
-    Format:
-    - Best product names
-    - 2-3 bullet reasons
-    - Keep it concise
+Format:
+🏆 Best Product: <name>
 
-    Context:
-    {context} 
+Reason:
+• point 1
+• point 2
 
-    Query:
-    {query} and  also include any better recommendations based on the query, even if they are not in the context.
-    """
+Context:
+{context}
+
+Query:
+{query}
+"""
 
     response = groq_client.chat.completions.create(
         model="llama-3.3-70b-versatile",

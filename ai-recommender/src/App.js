@@ -11,10 +11,11 @@ function App() {
   const handleSearch = async () => {
     setLoading(true);
 
-    const res = await fetch(`http://127.0.0.1:8000/recommend?query=${query}`);
+    const res = await fetch(`http://127.0.0.1:8000/agent?query=${query}`);
     const data = await res.json();
 
-    setProducts(data.products);
+    // setProducts(data.products);
+    setProducts(data.products || []);
     setAnswer(data.answer);
     setLoading(false);
   };
