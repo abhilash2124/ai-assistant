@@ -241,3 +241,17 @@ h1 {
   font-size: 11px;
   border-radius: 8px;
 }
+
+.ai-box p {
+  margin: 5px 0;
+}
+
+.ai-output {
+  white-space: pre-wrap;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.ai-output strong {
+  color: #4f46e5;
+}

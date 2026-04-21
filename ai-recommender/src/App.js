@@ -34,18 +34,9 @@ function App() {
         <button onClick={handleSearch}>Search</button>
       </div>
 
-      {/* {loading && <p>⏳ Loading...</p>} */}
       {loading && <div className="loader"></div>}
 
-      {/* <div className="grid">
-        {products.map((p) => (
-          <div className="card" key={p.id}>
-            <h3>{p.name}</h3>
-            <p>{p.description}</p>
-            <h4>₹{p.price}</h4>
-          </div>
-        ))}
-      </div> */}
+
       <div className="grid">
         {products.map((p, index) => (
           <div className="card" key={p.id}>
@@ -74,12 +65,9 @@ function App() {
           </div>
 
           <div className="ai-content">
-            {/* <p>{answer}</p> */}
-            <ul>
-              {answer.split(". ").map((line, index) => (
-                <li key={index}>{line}</li>
-              ))}
-            </ul>
+            {answer.split("\n").map((line, i) => (
+              <p key={i}>{line}</p>
+            ))}
           </div>
         </div>
       )}

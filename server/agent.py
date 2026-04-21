@@ -5,6 +5,8 @@ from langchain_groq import ChatGroq
 import os
 from groq import Groq
 
+from server.test import products
+
 # Tools
 
 load_dotenv()
@@ -19,23 +21,12 @@ def recommend_products(query: str) -> str:
         params={"query": query}
     ).json()
 
-    if not res.get("products"):
-        return "No products found"
-
-    names = [p["name"] for p in res["products"]]
-    # return f"Products: {names}\n{res['answer']}"
-    return f"""
-            📌 Recommended Products:
-            {[p['name'] for p in res['products']]}
-
-            💡 Explanation:
-            {res['answer']}
-            """
+    return res.get("answer", "No result")
 
 
 @tool
 def compare_products(product1: str, product2: str) -> str:
-    """Compare two products"""
+    """Compare two products and decide the best one"""
 
     res1 = requests.get("http://127.0.0.1:8000/recommend", params={"query": product1}).json()
     res2 = requests.get("http://127.0.0.1:8000/recommend", params={"query": product2}).json()
@@ -43,9 +34,15 @@ def compare_products(product1: str, product2: str) -> str:
     if not res1.get("products") or not res2.get("products"):
         return "Could not find products to compare. Please try different names."
 
-    p1 = res1["products"][0]
-    p2 = res2["products"][0]
+    def find_best_match(products, name):
+        name = name.lower()
+        for p in products:
+            if name in p["name"].lower():
+                return p
+        return products[0]
 
+    p1 = find_best_match(res1["products"], product1)
+    p2 = find_best_match(res2["products"], product2)
     prompt = f"""
 Compare these two products and decide the BEST one.
 
@@ -61,11 +58,10 @@ STRICT FORMAT:
 
 🏆 Best: <product name>
 
-Reason:
+Reasons:
 • point 1
 • point 2
-
-Do NOT add extra text.
+# Do NOT add extra text.
 """
 
     response = groq_client.chat.completions.create(
@@ -99,6 +95,8 @@ def agent(query):
     # Then continue normal flow
     
     print("\n🧠 Thinking...")
+    
+    result = None
 
     response = llm.bind_tools(tools).invoke(query)
 
@@ -115,10 +113,10 @@ def agent(query):
         for t in tools:
             if t.name == tool_name:
                 result = t.invoke(args)
-                return f"\nFinal Answer:\n{result}"
+                return result
 
     # If no tool needed
-    return result or response.content or "Sorry, I couldn't find an answer."
+        return result or (response.content or "Sorry, I couldn't find an answer.")
 
 
 # RUN

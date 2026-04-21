@@ -46,3 +46,10 @@ dump/
 
 # Logs
 *.log
+
+venv/
+__pycache__/
+*.pyc
+.env
+qdrant_data/
+node_modules/

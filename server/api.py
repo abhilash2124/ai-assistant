@@ -51,6 +51,12 @@ def extract_price(query):
 @app.get("/agent")
 def agent_api(query: str):
     result = agent(query)
+    
+    if "compare" in query.lower():
+        return {
+            "products": [],
+            "answer": result
+        }
 
     # ALSO call recommend to get products
     rec = recommend(query)
@@ -87,21 +93,6 @@ def recommend(query: str):
         category = "laptop"
 
     # Search
-    # if category:
-    #     results = client.query_points(
-    #         collection_name="products",
-    #         query=query_vector,
-    #         query_filter=Filter(
-    #             must=[FieldCondition(key="category", match=MatchValue(value=category))]
-    #         ),
-    #         limit=3
-    #     )
-    # else:
-    #     results = client.query_points(
-    #         collection_name="products",
-    #         query=query_vector,
-    #         limit=3
-    #     )
 
     # Build filter conditions
     conditions = []
@@ -142,12 +133,23 @@ def recommend(query: str):
     # Retry without price filter
         # Retry WITHOUT price but KEEP category
         if category:
-            fallback_conditions = [
-                FieldCondition(
-                    key="category",
-                    match=MatchValue(value=category)
+            fallback_conditions = []
+            
+            if category:
+                fallback_conditions.append(
+                    FieldCondition(
+                        key="category",
+                        match=MatchValue(value=category)
+                    )
                 )
-            ]
+            
+            if price_limit:
+                fallback_conditions.append(
+                    FieldCondition(
+                        key="price",
+                        range=Range(lte=price_limit)
+                    )
+                )
 
             results = client.query_points(
                 collection_name="products",
@@ -163,36 +165,64 @@ def recommend(query: str):
             "answer": "No matching products found. Try changing your query."
         }
     # Build context
-    context = "\n".join([
-        f"{res.payload['name']}: {res.payload['description']}"
-        for res in results.points
-    ])
+    
+    products_data = [
+    {
+        "name": res.payload["name"],
+        "price": res.payload["price"],
+        "description": res.payload["description"]
+    }
+    for res in results.points
+]
 
     prompt = f"""
-You are an expert product recommendation assistant.
+You are a strict product recommendation system.
 
-Use ONLY the given context.
+IMPORTANT RULES:
+- You MUST choose ONLY from the given products list
+- DO NOT use any product outside this list
+- If you choose outside → it is WRONG
+- Be concise
 
-Format:
-🏆 Best Product: <name>
+AVAILABLE PRODUCTS:
+{products_data}
 
-Reason:
-• point 1
-• point 2
-
-Context:
-{context}
-
-Query:
+USER QUERY:
 {query}
+
+RESPONSE FORMAT (STRICT):
+
+🏆 Best Product: <EXACT product name from list>
+
+💡 Why this?
+• reason 1
+• reason 2
+• reason 3
 """
 
     response = groq_client.chat.completions.create(
         model="llama-3.3-70b-versatile",
         messages=[{"role": "user", "content": prompt}]
     )
+    
+    answer = response.choices[0].message.content
+
+    valid_names = [p["name"] for p in products_data]
+
+    # Check if AI cheated
+    if not any(name in answer for name in valid_names):
+        # fallback → pick first result
+        best = products_data[0]["name"]
+        answer = f"""
+    🏆 Best Product: {best}
+
+    💡 Why this?
+    • Best match based on your query
+    • Relevant features
+    • Good value
+    """
 
     return {
         "products": [res.payload for res in results.points],
-        "answer": response.choices[0].message.content
+        "answer": answer
     }
